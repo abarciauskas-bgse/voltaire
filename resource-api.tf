@@ -17,7 +17,6 @@ variable "region" {
 
 variable "accountId" {
   type = "string"
-  default = "683743854237"
 }
 
 resource "aws_api_gateway_rest_api" "OpenAQMeasurementsAPI" {
@@ -141,7 +140,7 @@ resource "aws_lambda_function" "openAQ-getMeasurements" {
   filename         = "measurements-lambda.zip"
   function_name    = "openAQ-getMeasurements"
   # TODO: Add role to tf plan
-  role             = "arn:aws:iam::683743854237:role/service-role/lambdaRole"
+  role             = "arn:aws:iam::${var.accountId}:role/service-role/lambdaRole"
   handler          = "measurements.handler"
   runtime          = "nodejs8.10"
   source_code_hash = "${base64sha256(file("measurements-lambda.zip"))}"
