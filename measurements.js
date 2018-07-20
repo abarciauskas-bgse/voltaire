@@ -1,4 +1,9 @@
 const AWS = require('aws-sdk');
+const knex = require('knex')({
+  client: 'pg'//,
+  // connection: process.env.PG_CONNECTION_STRING,
+  // searchPath: ['knex', 'public'],
+});
 
 const athena = new AWS.Athena({
   region: 'us-east-1',
@@ -14,18 +19,19 @@ let params = {
   }
 };
 
-exports.handler = (event, context, cb) => {
-    let queryString = `SELECT * FROM "openaq_realtime_gzipped"."fetches_realtime_gzipped" `;
-    console.log(`event: ${JSON.stringify(event, null, 2)}`)
-    if (event.queryStringParameters) {
-      const queryKeys = Object.keys(event.queryStringParameters);
-      const queryValues = Object.values(event.queryStringParameters);
-      if (queryKeys.length > 0) {
-          queryString += `WHERE ${queryKeys[0]} = '${queryValues[0]}' `;
-      }      
-    }
-    queryString += `limit 10;`;
-    console.log(`Query string is ${queryString}`);
+function generateQuery(event) {
+  const table = `openaq_realtime_gzipped.fetches_realtime_gzipped`;
+  const queries = event.queryStringParameters;
+  let queryString = knex(table);
+  if (queries) {
+    queryString = queryString.where(queries);      
+  }
+  queryString = queryString.select('*').limit(10).toString();
+  return queryString;
+}
+
+function handler(event, context, cb) {
+    const queryString = generateQuery(event);
     params.QueryString = queryString;
 
     let response = {
@@ -48,3 +54,5 @@ exports.handler = (event, context, cb) => {
          cb(null, response);
        });
 };
+
+module.exports = { handler, generateQuery };

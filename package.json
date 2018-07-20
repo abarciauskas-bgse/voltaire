@@ -1,5 +1,7 @@
 {
   "dependencies": {
-    "aws-sdk": "^2.272.1"
+    "aws-sdk": "^2.279.1",
+    "jasmine": "^3.1.0",
+    "knex": "^0.15.2"
   }
 }
