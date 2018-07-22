@@ -34,5 +34,21 @@ describe('query generation', () => {
         `${baseQuery} where "country" = 'AD' and "city" = '${city}' ${limitClause}`
       );
     });
-  })
+  });
+
+  describe('with parameter[] parameters', () => {
+    const eventWithQuery = {
+      ...event,
+      queryStringParameters: {
+        'parameter[0]': 'co',
+        'parameter[1]': 'pm25'
+      }
+    };
+
+    it('returns the expected query with country', () => {
+      expect(generateQuery(eventWithQuery)).toEqual(
+        `${baseQuery} where "parameter" in ('co', 'pm25') ${limitClause}`
+      );
+    });
+  });
 });

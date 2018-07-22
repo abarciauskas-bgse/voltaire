@@ -19,12 +19,27 @@ let params = {
   }
 };
 
+const _ = require('lodash');
+
 function generateQuery(event) {
+  // Initiate the quety string
   const table = `openaq_realtime_gzipped.fetches_realtime_gzipped`;
-  const queries = event.queryStringParameters;
   let queryString = knex(table);
+
+  const queries = event.queryStringParameters;
+  // filter by one or more air quality parameters
+  let aqParameterQueries = [];
+  Object.keys(queries).forEach((key) => {
+    if (key.includes('parameter')) {
+      aqParameterQueries.push(queries[key]);
+      delete queries[key];
+    }
+  });
   if (queries) {
     queryString = queryString.where(queries);      
+  }
+  if (aqParameterQueries.length > 0) {
+    queryString = queryString.whereIn('parameter', aqParameterQueries);
   }
   queryString = queryString.select('*').limit(10).toString();
   return queryString;
